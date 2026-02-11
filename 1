@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เรื่องฟังก์ชันบันได & เอ็กซ์โพเนนเชียล</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+header {
+    background: white;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+.container {
+    max-width: 900px;
+    margin: 30px auto;
+}
+.card {
+    background: white;
+    padding: 20px;
+    margin: 20px;
+    border-radius: 15px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+}
+input {
+    padding: 6px;
+    margin-top: 10px;
+}
+button {
+    padding: 10px 20px;
+    margin: 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+}
+.submit-btn {
+    background: #28a745;
+    color: white;
+}
+.correct { color: green; }
+.wrong { color: red; }
+canvas { margin-top: 15px; }
+#explanation {
+    background: #f8f9fc;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+.author {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #555;
+}
+</style>
+</head>
+<body>
+
+<header>
+<h1>📘 เรื่องฟังก์ชันบันได & เอ็กซ์โพเนนเชียล</h1>
+<p>ทำทั้งหมด 10 ข้อ</p>
+<p class="author">จัดทำโดย ณัฐกรณ์ นิธิพิพัฒ เลขที่ 3 ชั้น 4/4</p>
+</header>
+
+<div class="container">
+<div id="quiz"></div>
+
+<div style="text-align:center;">
+<button class="submit-btn" onclick="checkAnswers()">ส่งคำตอบ</button>
+</div>
+
+<div class="card">
+<p id="result"></p>
+<div id="solutions"></div>
+<div id="explanation"></div>
+</div>
+</div>
+
+<script>
+
+let answers = [];
+
+function generateQuiz() {
+    let quizDiv = document.getElementById("quiz");
+    quizDiv.innerHTML = "";
+    answers = [];
+
+    for(let i=0;i<10;i++) {
+
+        let type = Math.floor(Math.random()*3);
+        let card = document.createElement("div");
+        card.className = "card";
+
+        if(type === 0) {
+            let x = (Math.random()*10 - 5).toFixed(1);
+            let ans = Math.floor(x);
+            card.innerHTML = `<b>ข้อ ${i+1}</b> จงหาค่า f(x)=⌊x⌋ เมื่อ x=${x}<br>
+                              <input type="number" id="q${i}">`;
+            answers.push(ans);
+        }
+
+        else if(type === 1) {
+            let a = Math.floor(Math.random()*3)+2;
+            let x = Math.floor(Math.random()*4)-2;
+            let ans = Math.pow(a,x);
+            card.innerHTML = `<b>ข้อ ${i+1}</b> จงหาค่า f(x)=${a}^${x}<br>
+                              <input type="number" step="any" id="q${i}">`;
+            answers.push(ans);
+        }
+
+        else {
+            let a = Math.floor(Math.random()*2)+2;
+            let ans = Math.pow(a,1);
+
+            card.innerHTML = `<b>ข้อ ${i+1}</b> จากกราฟ f(x)=${a}^x จงหาค่าเมื่อ x=1<br>
+                              <canvas id="chart${i}" width="300" height="200"></canvas>
+                              <br><input type="number" step="any" id="q${i}">`;
+
+            setTimeout(()=>createChart(`chart${i}`,a),100);
+            answers.push(ans);
+        }
+
+        quizDiv.appendChild(card);
+    }
+}
+
+function createChart(id,a){
+    let xVals=[];
+    let yVals=[];
+    for(let x=-2;x<=2;x++){
+        xVals.push(x);
+        yVals.push(Math.pow(a,x));
+    }
+
+    new Chart(document.getElementById(id),{
+        type:'line',
+        data:{
+            labels:xVals,
+            datasets:[{
+                label:`f(x)=${a}^x`,
+                data:yVals,
+                borderWidth:2,
+                fill:false
+            }]
+        },
+        options:{ responsive:false }
+    });
+}
+
+function checkAnswers(){
+    let score=0;
+    let solutionText="";
+
+    for(let i=0;i<10;i++){
+        let userAns=document.getElementById(`q${i}`).value;
+        let correct=answers[i];
+
+        if(Math.abs(userAns-correct)<0.01){
+            score++;
+            solutionText+=`<p class="correct">ข้อ ${i+1} ถูก ✔ (คำตอบ: ${correct})</p>`;
+        }else{
+            solutionText+=`<p class="wrong">ข้อ ${i+1} ผิด ✘ (คำตอบที่ถูก: ${correct})</p>`;
+        }
+    }
+
+    document.getElementById("result").innerHTML=
+        `<h3>คะแนนที่ได้: ${score} / 10</h3>`;
+
+    document.getElementById("solutions").innerHTML=solutionText;
+
+    document.getElementById("explanation").innerHTML = `
+    <h3>📚 สรุปความรู้</h3>
+    <p><b>ฟังก์ชันบันได (Step Function)</b> คือฟังก์ชันที่มีค่าเป็นช่วง ๆ ไม่ต่อเนื่อง 
+    เช่น f(x)=⌊x⌋ คือการปัดเศษลงเป็นจำนวนเต็ม กราฟจะมีลักษณะเหมือนขั้นบันได</p>
+
+    <p><b>ฟังก์ชันเอ็กซ์โพเนนเชียล (Exponential Function)</b> คือฟังก์ชันในรูป f(x)=a^x 
+    โดยที่ a > 0 และ a ≠ 1 ถ้า a > 1 กราฟจะเพิ่มขึ้นรวดเร็ว 
+    ถ้า 0 < a < 1 กราฟจะลดลง มักใช้ในเรื่องการเติบโตและการสลายตัว</p>
+    `;
+}
+
+generateQuiz();
+
+</script>
+
+</body>
+</html>
